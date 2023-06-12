@@ -51,13 +51,17 @@ float prev_pactive = 0.0;
 float preactive = 0.0;
 float prev_preactive = 0.0;
 
-float OV_Set = 200.00;                                                // Set Over Voltage limit
+float OV_Set = 230.00;                                                // Set Over Voltage limit
 float OC_Set = 10.0;                                                  // Set Over Current limit
 float W_Set = ((OV_Set * OC_Set) / 1000);                             // Set Over Current limit
 
-int Alarm_ledState = LOW;                                             // State used to set LED
+int Alarm_State = LOW;                                               // State used to set LED
+int OV_State = LOW;                                                  // State used to set LED
 unsigned long previousMillis = 0;                                     // Timer for blinking LED without delay() function
-const long interval = 1000;                                           // interval at which to blink (milliseconds)
+const long interval = 250;                                           // interval at which to blink (milliseconds)
+
+unsigned long previousMillis1 = 0;                                     // Timer for blinking LED without delay() function
+
 
 void setup() {
 
@@ -100,17 +104,25 @@ void setup() {
 
 void LEDs() {
 
-  if (volts > OV_Set) { 
+  if ((volts >= OV_Set) && (OV_State == LOW)) { 
+    OV_State = HIGH;
     alarm_led();
 
-    } else if (volts > 1.0) {
-      analogWrite(A2, 255);
-      analogWrite(A5, 0);
+    } else if ((volts >= OV_Set) && (OV_State == HIGH)) {
+      alarm_led();
     
-    } else if (volts < 1.0) {
-      analogWrite(A2, 0);
-      analogWrite(A5, 255);
-  }
+      } else if ((volts < OV_Set) && (OV_State == HIGH)) { 
+        OV_State = LOW; 
+    }
+
+  if ((volts > 1.0) && (volts < OV_Set) && (OV_State == LOW))  {
+      digitalWrite(A2, HIGH);
+      digitalWrite(A5, LOW);
+  
+    } else if ((volts < 1.0)  && (OV_State == 0)) {
+      digitalWrite(A2, LOW);
+      digitalWrite(A5, HIGH);
+    }
 }
 
 void alarm_led() {
@@ -122,31 +134,14 @@ void alarm_led() {
     previousMillis = currentMillis;
 
     // if the LED is off turn it on and vice-versa:
-    if (Alarm_ledState == LOW) {
-      Alarm_ledState = HIGH;
-    } else {
-      Alarm_ledState = LOW;
+    if (Alarm_State == LOW) {
+      Alarm_State = HIGH;
+        } else {
+          Alarm_State = LOW;
     }
     // set the LED with the ledState of the variable:
-    digitalWrite(A2, Alarm_ledState);
-    digitalWrite(A5, LOW);
-
-    }
-
-  if (currentMillis - previousMillis >= interval) {
-    // save the last time you blinked the LED
-    previousMillis = currentMillis;
-
-    // if the LED is off turn it on and vice-versa:
-    if (Alarm_ledState == LOW) {
-      Alarm_ledState = HIGH;
-    } else {
-      Alarm_ledState = LOW;
-    }
-    // set the LED with the ledState of the variable:
-    digitalWrite(A2, LOW);
-    digitalWrite(A5, Alarm_ledState);
-
+     digitalWrite(A2, Alarm_State);
+     digitalWrite(A5, !Alarm_State);
     }
 }
   
@@ -249,16 +244,16 @@ void draw_screen() {
   prev_papparent = papparent;
 
   tft.setFont(&FreeSans12pt7b);
-  tft.setTextSize(1);
+  tft.setTextSize(1); 
   
   tft.setTextColor(ST77XX_WHITE);
   tft.setCursor(250, 155);
-  tft.println(prev_pfactor); 
+  tft.println(prev_pfactor,3); 
   tft.setTextColor(ST77XX_BLACK);
   tft.setCursor(250, 155);
-  tft.println(pfactor, 2);
-
+  tft.println(pfactor, 3);
   prev_pfactor = pfactor;
+
   
   tft.setTextColor(ST77XX_WHITE);
   tft.setCursor(250, 185);
@@ -288,9 +283,6 @@ void measure() {
   Serial.print(volts, 2);
   Serial.print(F(" Amps: "));
   Serial.println(amps, 2);
-
- // float pactive = 0.0;
- // float preactive = 0.0;
   
   mySensor.readPowerActiveReactive(&pactive, &preactive);                    // Read the active and reactive power
   Serial.print(F("Power: Active (W): "));
