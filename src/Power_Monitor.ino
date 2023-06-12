@@ -44,8 +44,8 @@ float amps = 0.0;
 float prev_amps = 0.0;
 float papparent = 0.0;
 float prev_papparent = 0.0;
-float pfactor = 0.0;
-float prev_pfactor = 0.0;
+float pfactor = 0.000;
+float prev_pfactor = 0.000;
 float pactive = 0.0;
 float prev_pactive = 0.0;
 float preactive = 0.0;
@@ -252,28 +252,28 @@ void draw_screen() {
   tft.setTextSize(1);
   
   tft.setTextColor(ST77XX_WHITE);
-  tft.setCursor(255, 155);
+  tft.setCursor(250, 155);
   tft.println(prev_pfactor); 
   tft.setTextColor(ST77XX_BLACK);
-  tft.setCursor(255, 155);
+  tft.setCursor(250, 155);
   tft.println(pfactor, 2);
 
   prev_pfactor = pfactor;
   
   tft.setTextColor(ST77XX_WHITE);
-  tft.setCursor(255, 185);
+  tft.setCursor(250, 185);
   tft.println(prev_pactive); 
   tft.setTextColor(ST77XX_BLACK);
-  tft.setCursor(255, 185);
+  tft.setCursor(250, 185);
   tft.println(pactive, 2); 
 
   prev_pactive = pactive;
 
   tft.setTextColor(ST77XX_WHITE);
-  tft.setCursor(255, 215);
+  tft.setCursor(250, 215);
   tft.println(prev_preactive); 
   tft.setTextColor(ST77XX_BLACK);
-  tft.setCursor(255, 215);
+  tft.setCursor(250, 215);
   tft.println(preactive, 2); 
 
   prev_preactive = preactive;
